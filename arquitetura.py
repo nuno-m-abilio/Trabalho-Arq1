@@ -14,7 +14,7 @@ class Instrucao:
         "Opcode a, b, c". Para as operções que tem somente 1, 2 ou nenhum operador, os valores b e
         c ficam marcados com o valor inválido -1.
         
-        >>> x = 'add 2, 31, 100'
+        >>> x = 'add r2, r31, r100'
         >>> y = Instrucao(x)
         >>> y.Opcode
         'add'
@@ -24,8 +24,19 @@ class Instrucao:
         31
         >>> y.c
         100
+
+        >>> x = 'lw r2, 31(r100)'
+        >>> y = Instrucao(x)
+        >>> y.Opcode
+        'lw'
+        >>> y.a
+        2
+        >>> y.b
+        31
+        >>> y.c
+        100
         
-        >>> x = 'not 2, 32'
+        >>> x = 'not r2, r32'
         >>> y = Instrucao(x)
         >>> y.Opcode
         'not'
@@ -36,10 +47,10 @@ class Instrucao:
         >>> y.c
         -1
 
-        >>> x = 'jr 0'
+        >>> x = 'jal 0'
         >>> y = Instrucao(x)
         >>> y.Opcode
-        'jr'
+        'jal'
         >>> y.a
         0
         >>> y.b
@@ -70,17 +81,20 @@ class Instrucao:
         i += 1 
         if i < tam:
             while i < tam and instStr[i] != ',':
-                aAux += instStr[i]
+                if instStr[i] != 'r':
+                    aAux += instStr[i]
                 i += 1
             i += 2
             if i < tam:
-                while i < tam and instStr[i] != ',':
-                    bAux += instStr[i]
+                while i < tam and instStr[i] != ',' and instStr[i] != '(':
+                    if instStr[i] != 'r':
+                        bAux += instStr[i]
                     i += 1
                 i += 2
                 if i < tam:
-                    while i < tam:
-                        cAux += instStr[i]
+                    while i < tam  and instStr[i] != ')':
+                        if instStr[i] != 'r':
+                            cAux += instStr[i]
                         i += 1
                 else:
                     cAux = '-1'
@@ -185,18 +199,21 @@ class Arquitetura:
     (MP), cache de instruções, cache de dados e ciclo de instrução.'''
     
     processador:Processador
-    MP:list[int|str]
+    MP:list[list[int|str]]
     cacheInst:list[list[list[str]]]
     cacheDados:list[list[list[int]]]
-    InstrucaoExecutada:CicloDeInstrucao
+    cicloDeInstrucao:CicloDeInstrucao
 
     def __init__(self, palavrasPorLinha:int, linhasPorConjunto:int, numConjuntos:int, tamMP:int) -> None:
         ''' Construtor padrão da arquitetura que inicializa o processador e o ciclo de instrução em
         suas formas padrão e as memórias princial e cache conforme os parâmetros passados na
-        entrada. '''
+        entrada. Ressalta-se aqui que a MP é dividida em blocos de tamanho igual às linhas da
+        cache, existindo a possibilidade de haver um último bloco menor que os demais, mas sem que
+        isso influencie na cache '''
 
         self.processador = Processador()
-        self.MP = [0] * tamMP
+        self.MP = [[0] * palavrasPorLinha ] * int(tamMP / palavrasPorLinha)
+        self.MP += [[0] * (tamMP % palavrasPorLinha)]
         self.cacheInst = [[[''] * palavrasPorLinha ] * linhasPorConjunto ] * numConjuntos
         self.cacheDados = [[[0] * palavrasPorLinha ] * linhasPorConjunto ] * numConjuntos
         self.cicloDeInstrucao = CicloDeInstrucao()
