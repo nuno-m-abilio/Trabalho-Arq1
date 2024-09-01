@@ -203,6 +203,7 @@ class Arquitetura:
     cacheInst:list[list[list[str]]]
     cacheDados:list[list[list[int]]]
     cicloDeInstrucao:CicloDeInstrucao
+    infoMemoria:list[int]
 
     def __init__(self, palavrasPorLinha:int, linhasPorConjunto:int, numConjuntos:int, tamMP:int) -> None:
         ''' Construtor padrão da arquitetura que inicializa o processador e o ciclo de instrução em
@@ -217,6 +218,7 @@ class Arquitetura:
         self.cacheInst = [[[''] * palavrasPorLinha ] * linhasPorConjunto ] * numConjuntos
         self.cacheDados = [[[0] * palavrasPorLinha ] * linhasPorConjunto ] * numConjuntos
         self.cicloDeInstrucao = CicloDeInstrucao()
+        self.infoMemoria = [palavrasPorLinha, linhasPorConjunto, numConjuntos, tamMP]
     
     def rodarInstrucao(self):
         ''' Método que vai ler e executar uma operação alterando o Ciclo de Instruções. Você decodifica a
