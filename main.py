@@ -1,6 +1,5 @@
-import arquitetura as arq
-import argparse
-import io
+import arquitetura as arq, funcoes, argparse, io
+
 
 # Configurando a chamada dos argumentos na linha de comando
 parser = argparse.ArgumentParser()
@@ -19,11 +18,11 @@ def main(arquivoDeOperacoes:io.TextIOWrapper, palavrasPorLinha:int, linhasPorCon
         palavrasPorLinha = int(input('Valor de palavras por linha da cache inválido. O valor deve'
         'ser um inteiro entre 1 e 128. Por favor, insirar um valor correto:\n'))
     
-    totalPalavrasCache = palavrasPorLinha * linhasPorConjunto * numConjuntos
+    totalPalavrasCaches = 2 * palavrasPorLinha * linhasPorConjunto * numConjuntos
 
-    while tamMP <= (totalPalavrasCache):
+    while tamMP <= (totalPalavrasCaches):
         tamMP = int(input('Valor de palavras da memória principal inválido. O valor deve'
-        'ser maior que o total de palavras da cache (%d). Por favor, insirar um valor correto:\n' % totalPalavrasCache))
+        'ser maior que o total de palavras da cache (%d). Por favor, insirar um valor correto:\n' % totalPalavrasCaches))
 
     print('Informações de memória:')
     print('-> %d palavras por linha;' % palavrasPorLinha)
@@ -33,7 +32,10 @@ def main(arquivoDeOperacoes:io.TextIOWrapper, palavrasPorLinha:int, linhasPorCon
 
     arquitetura = arq.Arquitetura(palavrasPorLinha, linhasPorConjunto, numConjuntos, tamMP)
 
-    
+    funcoes.carregarInstrEmMP(arquitetura, arquivoDeOperacoes)
+
+    arquitetura.rodarSequenciaInstr()
+
 
 if __name__ == '__main__':
     arquivoDeOperacoes = open(args.arquivoDeOperacoes, 'rt') 
