@@ -1,4 +1,4 @@
-import funcoes
+import io
 
 class Instrucao:
     ''' Classe que representa uma Instrução a ser realizada/armazenada na Arquitetura. Cada
@@ -10,7 +10,7 @@ class Instrucao:
     b:int
     c:int
 
-    def __init__(self, instStr) -> None:
+    def __init__(self, instStr:str) -> None:
         ''' O construtor toma como entrada uma String e faz seu processamento, separando o Opcode
         dos valores referenciais. Para isso, considera-se que a string está no formato correto de
         "Opcode a, b, c". Para as operções que tem somente 1, 2 ou nenhum operador, os valores b e
@@ -160,7 +160,7 @@ class Processador:
     Programa (PC), Ponteiro da Pilha (RSP) e Endereço de Retorno (RA), além de um bool que indica
     se houve oveflow na última operação.'''
 
-    registradores: list[int]
+    Registradores: list[int]
     PC:int
     RSP:int
     RA:int
@@ -219,7 +219,7 @@ class Arquitetura:
         print(self.processador.Registradores)
         print('\n')
         print('Registradores de controle de estado')
-        print('PC:', self.processador.PC, '  RSP:', self.processador.RSP, '  RA:', self.processador.RA, '  OS:', self.processador.OF)
+        print('PC:', self.processador.PC, '  RSP:', self.processador.RSP, '  RA:', self.processador.RA, '  OF:', self.processador.OF)
         print('\n')
         print('Memória Cache de Instruções:')
         print('\n')
@@ -265,8 +265,8 @@ class Arquitetura:
     def lerInst(self, endereco:int) -> str:
         ''' Método que retorna uma string com a instrução em "endereço". Caso o bloco da instrução
         não esteja na cache, ele é colocado nela seguindo a política de substituição LFU.'''
-        tagInst:int = funcoes.tag(self, endereco)
-        conjInst:int = funcoes.conjNaCache(self, endereco)
+        tagInst:int = tag(self, endereco)
+        conjInst:int = conjNaCache(self, endereco)
         i:int = 0
         tagAtual:int|None = self.cacheInst[conjInst][i].tag
         linhasPorConj:int = self.infoMemoria[1]
@@ -281,18 +281,18 @@ class Arquitetura:
                     if self.cacheInst[conjInst][j].acessos < self.cacheInst[conjInst][i].acessos:
                         i = j
                 self.cacheInst[conjInst][i].acessos = 0
-            self.cacheInst[conjInst][i].enderecos = self.MP[funcoes.blocoNaMP(self, endereco)] # type: ignore
+            self.cacheInst[conjInst][i].enderecos = self.MP[blocoNaMP(self, endereco)] # type: ignore
             self.cacheInst[conjInst][i].tag = tagInst
         self.cacheInst[conjInst][i].acessos += 1 
         # O str() no return serve para, ainda que um a linha de inteiros entre indevidamente na cache de instruções,
         # a saida seja uma string inválida que para o ciclo de instruçõesn (não ser aqui onde dá erro).
-        return str(self.cacheInst[conjInst][i].enderecos[funcoes.localNoBloco(self, endereco)])
+        return str(self.cacheInst[conjInst][i].enderecos[localNoBloco(self, endereco)])
 
     def lerDados(self, endereco:int) -> int:
         ''' Método que retorna um inteiro com o dado do endereço de PC. Caso o bloco da instrução
         não esteja na cache, ele é colocado nela seguindo a política de substituição LFU. '''
-        tagDados:int = funcoes.tag(self, endereco)
-        conjDados:int = funcoes.conjNaCache(self, endereco)
+        tagDados:int = tag(self, endereco)
+        conjDados:int = conjNaCache(self, endereco)
         i:int = 0
         tagAtual:int|None = self.cacheDados[conjDados][i].tag
         linhasPorConj:int = self.infoMemoria[1]
@@ -307,16 +307,16 @@ class Arquitetura:
                     if self.cacheDados[conjDados][j].acessos < self.cacheDados[conjDados][i].acessos:
                         i = j
                 self.cacheDados[conjDados][i].acessos = 0
-            self.cacheDados[conjDados][i].enderecos = self.MP[funcoes.blocoNaMP(self, endereco)] # type: ignore
+            self.cacheDados[conjDados][i].enderecos = self.MP[blocoNaMP(self, endereco)] # type: ignore
             self.cacheDados[conjDados][i].tag = tagDados
         self.cacheDados[conjDados][i].acessos += 1 
-        return self.cacheDados[conjDados][i].enderecos[funcoes.localNoBloco(self, endereco)]
+        return self.cacheDados[conjDados][i].enderecos[localNoBloco(self, endereco)]
 
     def atualizaLinhaCacheDados(self, endereco:int):
         ''' Método que atualiza o valor de uma linha da cache de dados com palavra de "endereco".
         Caso a linha não esteja na cache, nada acontece.'''
-        tagDados:int = funcoes.tag(self, endereco)
-        conjDados:int = funcoes.conjNaCache(self, endereco)
+        tagDados:int = tag(self, endereco)
+        conjDados:int = conjNaCache(self, endereco)
         i:int = 0
         tagAtual:int|None = self.cacheDados[conjDados][i].tag
         linhasPorConj:int = self.infoMemoria[1]
@@ -324,7 +324,7 @@ class Arquitetura:
             i += 1
             tagAtual = self.cacheDados[conjDados][i].tag
         if tagAtual == tagDados:
-            self.cacheDados[conjDados][i].enderecos = self.MP[funcoes.blocoNaMP(self, endereco)] # type: ignore
+            self.cacheDados[conjDados][i].enderecos = self.MP[blocoNaMP(self, endereco)] # type: ignore
 
 
 
@@ -340,87 +340,123 @@ def executaInstrucao(instrucao:Instrucao, arquitetura:Arquitetura) -> bool:
         case 'Inicio':
             print('Iniciando Ciclo de Instruções')
         case 'add':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores [instrucao.b] + arquitetura.processador.registradores[instrucao.c]
+            resultado:int = arquitetura.processador.Registradores[instrucao.b] + arquitetura.processador.Registradores[instrucao.c]
+            arquitetura.processador.Registradores[instrucao.a] = resultado
+            arquitetura.processador.OF = (resultado > (2**63 - 1)) or (resultado < -(2**63))
             arquitetura.processador.PC += 1
         case 'addi':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores[instrucao.b] + instrucao.c
+            resultado = arquitetura.processador.Registradores[instrucao.b] + instrucao.c
+            arquitetura.processador.Registradores[instrucao.a] = resultado
+            arquitetura.processador.OF = (resultado > (2**63 - 1)) or (resultado < -(2**63))
             arquitetura.processador.PC += 1
         case 'sub':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores[instrucao.b] - arquitetura.processador.registradores[instrucao.c]
+            resultado = arquitetura.processador.Registradores [instrucao.b] - arquitetura.processador.Registradores[instrucao.c]
+            arquitetura.processador.Registradores[instrucao.a] = resultado
+            arquitetura.processador.OF = (resultado > (2**63 - 1)) or (resultado < -(2**63))
             arquitetura.processador.PC += 1
         case 'subi':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores[instrucao.b] - instrucao.c
+            resultado = arquitetura.processador.Registradores[instrucao.b] - instrucao.c
+            arquitetura.processador.Registradores[instrucao.a] = resultado
+            arquitetura.processador.OF = (resultado > (2**63 - 1)) or (resultado < -(2**63))
             arquitetura.processador.PC += 1
         case 'mul':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores[instrucao.b] * arquitetura.processador.registradores[instrucao.c]
+            resultado = arquitetura.processador.Registradores [instrucao.b] * arquitetura.processador.Registradores[instrucao.c]
+            arquitetura.processador.Registradores[instrucao.a] = resultado
+            arquitetura.processador.OF = (resultado > (2**63 - 1)) or (resultado < -(2**63))
             arquitetura.processador.PC += 1
         case 'div':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores[instrucao.b] // arquitetura.processador.registradores[instrucao.c]
+            resultado = arquitetura.processador.Registradores [instrucao.b] // arquitetura.processador.Registradores[instrucao.c]
+            arquitetura.processador.Registradores[instrucao.a] = resultado
+            arquitetura.processador.OF = (resultado > (2**63 - 1)) or (resultado < -(2**63))
             arquitetura.processador.PC += 1
         case 'not':
-            arquitetura.processador.registradores[instrucao.a] = ~ arquitetura.processador.registradores[instrucao.b]
+            arquitetura.processador.Registradores[instrucao.a] = ~ arquitetura.processador.Registradores[instrucao.b]
             arquitetura.processador.PC += 1
         case 'or':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores[instrucao.b] & arquitetura.processador.registradores[instrucao.c]
+            arquitetura.processador.Registradores[instrucao.a] = arquitetura.processador.Registradores[instrucao.b] & arquitetura.processador.Registradores[instrucao.c]
             arquitetura.processador.PC += 1
         case 'and':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores[instrucao.b] | arquitetura.processador.registradores[instrucao.c]
+            arquitetura.processador.Registradores[instrucao.a] = arquitetura.processador.Registradores[instrucao.b] | arquitetura.processador.Registradores[instrucao.c]
             arquitetura.processador.PC += 1
         case 'blti':
-            if arquitetura.processador.registradores[instrucao.a] < arquitetura.processador.registradores[instrucao.b]:
+            if arquitetura.processador.Registradores[instrucao.a] < arquitetura.processador.Registradores[instrucao.b]:
                 arquitetura.processador.PC = instrucao.c
             else:
                 arquitetura.processador.PC += 1
         case 'bgti':
-            if arquitetura.processador.registradores[instrucao.a] > arquitetura.processador.registradores[instrucao.b]:
+            if arquitetura.processador.Registradores[instrucao.a] > arquitetura.processador.Registradores[instrucao.b]:
                 arquitetura.processador.PC = instrucao.c
             else:
                 arquitetura.processador.PC += 1
         case 'beqi':
-            if arquitetura.processador.registradores[instrucao.a] == arquitetura.processador.registradores[instrucao.b]:
+            if arquitetura.processador.Registradores[instrucao.a] == arquitetura.processador.Registradores[instrucao.b]:
                 arquitetura.processador.PC = instrucao.c
             else:
                 arquitetura.processador.PC += 1
         case 'blt':
-            if arquitetura.processador.registradores[instrucao.a] < arquitetura.processador.registradores[instrucao.b]:
-                arquitetura.processador.PC = arquitetura.processador.registradores[instrucao.c]
+            if arquitetura.processador.Registradores[instrucao.a] < arquitetura.processador.Registradores[instrucao.b]:
+                arquitetura.processador.PC = arquitetura.processador.Registradores[instrucao.c]
             else:
                 arquitetura.processador.PC += 1
         case 'bgt':
-            if arquitetura.processador.registradores[instrucao.a] > arquitetura.processador.registradores[instrucao.b]:
-                arquitetura.processador.PC = arquitetura.processador.registradores[instrucao.c]
+            if arquitetura.processador.Registradores[instrucao.a] > arquitetura.processador.Registradores[instrucao.b]:
+                arquitetura.processador.PC = arquitetura.processador.Registradores[instrucao.c]
             else:
                 arquitetura.processador.PC += 1
         case 'beq':
-            if arquitetura.processador.registradores[instrucao.a] == arquitetura.processador.registradores[instrucao.b]:
-                arquitetura.processador.PC = arquitetura.processador.registradores[instrucao.c]
+            if arquitetura.processador.Registradores[instrucao.a] == arquitetura.processador.Registradores[instrucao.b]:
+                arquitetura.processador.PC = arquitetura.processador.Registradores[instrucao.c]
             else:
                 arquitetura.processador.PC += 1
         case 'jr':
-            arquitetura.processador.PC = arquitetura.processador.registradores[instrucao.a]
+            arquitetura.processador.PC = arquitetura.processador.Registradores[instrucao.a]
         case 'jof':
             if arquitetura.processador.OF:
-                arquitetura.processador.PC = arquitetura.processador.registradores[instrucao.a]
+                arquitetura.processador.PC = arquitetura.processador.Registradores[instrucao.a]
         case 'jal':
             arquitetura.processador.RA = arquitetura.processador.PC + 1
             arquitetura.processador.PC = instrucao.a
         case 'ret':
             arquitetura.processador.PC = arquitetura.processador.RA
         case 'lw':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.lerDados(instrucao.b + arquitetura.processador.registradores[instrucao.c])
+            arquitetura.processador.Registradores[instrucao.a] = arquitetura.lerDados(instrucao.b + arquitetura.processador.Registradores[instrucao.c])
             arquitetura.processador.PC += 1
         case 'sw':
-            endereco = instrucao.b + arquitetura.processador.registradores[instrucao.c]
-            arquitetura.MP[funcoes.blocoNaMP(arquitetura, endereco)][funcoes.localNoBloco(arquitetura, endereco)] = arquitetura.processador.registradores[instrucao.a] # Valor na MP atualizado
+            endereco = instrucao.b + arquitetura.processador.Registradores[instrucao.c]
+            arquitetura.MP[blocoNaMP(arquitetura, endereco)][localNoBloco(arquitetura, endereco)] = arquitetura.processador.Registradores[instrucao.a] # Valor na MP atualizado
             arquitetura.atualizaLinhaCacheDados(endereco) # Valor na Cache Atualizado
             arquitetura.processador.PC += 1
         case 'mov':
-            arquitetura.processador.registradores[instrucao.a] = arquitetura.processador.registradores[instrucao.b]
+            arquitetura.processador.Registradores[instrucao.a] = arquitetura.processador.Registradores[instrucao.b]
             arquitetura.processador.PC += 1
         case 'movi':
-            arquitetura.processador.registradores[instrucao.a] = instrucao.b
+            arquitetura.processador.Registradores[instrucao.a] = instrucao.b
             arquitetura.processador.PC += 1
         case _:
             print('Operação Inválida - Fim de sequência de Operações')
             return False
     return True
+
+#Bloco
+def blocoNaMP(arquitetura:Arquitetura, endereco:int) -> int:
+    return endereco // arquitetura.infoMemoria[0]
+
+#Palavra
+def localNoBloco(arquitetura:Arquitetura, endereco:int) -> int:
+    return endereco % arquitetura.infoMemoria[0]
+
+#Conjunto
+def conjNaCache(arquitetura:Arquitetura, endereco:int) -> int:
+    return blocoNaMP(arquitetura, endereco) % arquitetura.infoMemoria[2]
+
+# tag
+def tag(arquitetura:Arquitetura, endereco:int) -> int:
+    return blocoNaMP(arquitetura, endereco) // arquitetura.infoMemoria[2]
+
+def carregarInstrEmMP(arquitetura:Arquitetura, arquivoDeOperacoes:io.TextIOWrapper) -> None:
+    instLida:str = arquivoDeOperacoes.readline().strip()
+    i:int = 0
+    while instLida != '':
+        arquitetura.MP[blocoNaMP(arquitetura, i)][localNoBloco(arquitetura, i)] = instLida
+        instLida = arquivoDeOperacoes.readline().strip()
+        i += 1

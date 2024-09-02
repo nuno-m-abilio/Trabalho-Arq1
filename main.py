@@ -1,4 +1,4 @@
-import arquitetura as arq, funcoes, argparse, io
+import arquitetura as arq, argparse, io
 
 
 # Configurando a chamada dos argumentos na linha de comando
@@ -12,6 +12,16 @@ args = parser.parse_args()
 
 
 def main(arquivoDeOperacoes:io.TextIOWrapper, palavrasPorLinha:int, linhasPorConjunto:int, numConjuntos:int, tamMP:int):
+    ''' Função que tem interação direta com o usuário, tomando como entrada um arquivo aberto de
+    instruções e os dados da memória da arquitetura a ser criada. Caso algum desses dados de
+    memória seja inadequado, a própria função requer que o usuário corrija-o. Assim, um objeto da
+    classe arquitetura é criado, as instruções são colocadas na MP e então executadas em sequência.
+    
+    Obs: O arquivo de operações lido não deve ter linhas vazias em seu interior, pois assim as
+    instruções seguintes não serão lidas devido ao laço while da funão funcoes.carregarInstrEmMP.
+    De modo semelhante, não é o ideal ter instruções inválidas em seu interior, pois, ao
+    encontrá-las, o ciclo de instrução irá se encerrar tentando executá-las.'''
+
     print('"Inicializando simulador de arquitetura simplificada com memória cache"\n')
 
     while palavrasPorLinha < 1 or palavrasPorLinha > 128:
@@ -32,7 +42,7 @@ def main(arquivoDeOperacoes:io.TextIOWrapper, palavrasPorLinha:int, linhasPorCon
 
     arquitetura = arq.Arquitetura(palavrasPorLinha, linhasPorConjunto, numConjuntos, tamMP)
 
-    funcoes.carregarInstrEmMP(arquitetura, arquivoDeOperacoes)
+    arq.carregarInstrEmMP(arquitetura, arquivoDeOperacoes)
 
     arquitetura.rodarSequenciaInstr()
 
@@ -40,3 +50,4 @@ def main(arquivoDeOperacoes:io.TextIOWrapper, palavrasPorLinha:int, linhasPorCon
 if __name__ == '__main__':
     arquivoDeOperacoes = open(args.arquivoDeOperacoes, 'rt') 
     main(arquivoDeOperacoes, args.palavrasPorLinha, args.linhasPorConjunto, args.numConjuntos, args.tamMP)
+    arquivoDeOperacoes.close()
