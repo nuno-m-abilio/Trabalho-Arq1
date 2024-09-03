@@ -16,7 +16,7 @@ class Instrucao:
         "Opcode a, b, c". Para as operções que tem somente 1, 2 ou nenhum operador, os valores b e
         c ficam marcados com o valor inválido -1.
         
-        >>> x = 'add r2, r31, r100'
+        >>> x = 'add r2,r31,r100'
         >>> y = Instrucao(x)
         >>> y.Opcode
         'add'
@@ -27,7 +27,7 @@ class Instrucao:
         >>> y.c
         100
 
-        >>> x = 'lw r2, 31(r100)'
+        >>> x = 'lw r2,31(r100)'
         >>> y = Instrucao(x)
         >>> y.Opcode
         'lw'
@@ -38,7 +38,7 @@ class Instrucao:
         >>> y.c
         100
         
-        >>> x = 'not r2, r32'
+        >>> x = 'not r2,r32'
         >>> y = Instrucao(x)
         >>> y.Opcode
         'not'
@@ -86,16 +86,16 @@ class Instrucao:
                 if instStr[i] != 'r':
                     aAux += instStr[i]
                 i += 1
-            i += 2
+            i += 1
             if i < tam:
                 while i < tam and instStr[i] != ',' and instStr[i] != '(':
-                    if instStr[i] != 'r':
+                    if instStr[i] != 'r' and instStr[i] != ' ':
                         bAux += instStr[i]
                     i += 1
-                i += 2
+                i += 1
                 if i < tam:
                     while i < tam  and instStr[i] != ')':
-                        if instStr[i] != 'r':
+                        if instStr[i] != 'r' and instStr[i] != ' ':
                             cAux += instStr[i]
                         i += 1
                 else:
@@ -199,12 +199,12 @@ class Arquitetura:
         # Correção de parametros inválidos realizados na main
 
         self.processador = Processador()
-        self.MP = [[''] * palavrasPorLinha ] * int(tamMP / palavrasPorLinha)
+        self.MP = [[''] * palavrasPorLinha for _ in range(int(tamMP / palavrasPorLinha))]
         corretorBlocosMP:int = tamMP % palavrasPorLinha
         if corretorBlocosMP > 0:
             self.MP += [[''] * corretorBlocosMP]
-        self.cacheInst = [[LinhaCacheInstr(palavrasPorLinha) ] * linhasPorConjunto ] * numConjuntos
-        self.cacheDados = [[LinhaCacheDados(palavrasPorLinha) ] * linhasPorConjunto ] * numConjuntos
+        self.cacheInst = [[LinhaCacheInstr(palavrasPorLinha) for _ in range(linhasPorConjunto)] for _ in range(numConjuntos)]
+        self.cacheDados = [[LinhaCacheDados(palavrasPorLinha) for _ in range(linhasPorConjunto)]for _ in range(numConjuntos)]
         self.cicloDeInstrucao = CicloDeInstrucao()
         self.infoMemoria = [palavrasPorLinha, linhasPorConjunto, numConjuntos, tamMP]
     
@@ -456,7 +456,7 @@ def tag(arquitetura:Arquitetura, endereco:int) -> int:
 def carregarInstrEmMP(arquitetura:Arquitetura, arquivoDeOperacoes:io.TextIOWrapper) -> None:
     instLida:str = arquivoDeOperacoes.readline().strip()
     i:int = 0
-    while instLida != '':
+    while instLida:
         arquitetura.MP[blocoNaMP(arquitetura, i)][localNoBloco(arquitetura, i)] = instLida
         instLida = arquivoDeOperacoes.readline().strip()
         i += 1

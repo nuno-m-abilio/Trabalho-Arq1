@@ -17,10 +17,11 @@ def main(arquivoDeOperacoes:io.TextIOWrapper, palavrasPorLinha:int, linhasPorCon
     memória seja inadequado, a própria função requer que o usuário corrija-o. Assim, um objeto da
     classe arquitetura é criado, as instruções são colocadas na MP e então executadas em sequência.
     
-    Obs: O arquivo de operações lido não deve ter linhas vazias em seu interior, pois assim as
+    Obs.1: O arquivo de operações lido não deve ter linhas vazias em seu interior, pois assim as
     instruções seguintes não serão lidas devido ao laço while da funão funcoes.carregarInstrEmMP.
     De modo semelhante, não é o ideal ter instruções inválidas em seu interior, pois, ao
-    encontrá-las, o ciclo de instrução irá se encerrar tentando executá-las.'''
+    encontrá-las, o ciclo de instrução irá se encerrar tentando executá-las.
+    '''
 
     print('"Inicializando simulador de arquitetura simplificada com memória cache"\n')
 
