@@ -18,7 +18,7 @@ def main(arquivoDeOperacoes:io.TextIOWrapper, palavrasPorLinha:int, linhasPorCon
     classe arquitetura é criado, as instruções são colocadas na MP e então executadas em sequência.
     
     Obs.1: O arquivo de operações lido não deve ter linhas vazias em seu interior, pois assim as
-    instruções seguintes não serão lidas devido ao laço while da funão funcoes.carregarInstrEmMP.
+    instruções seguintes não serão lidas devido ao laço while da função funcoes.carregarInstrEmMP.
     De modo semelhante, não é o ideal ter instruções inválidas em seu interior, pois, ao
     encontrá-las, o ciclo de instrução irá se encerrar tentando executá-las.
     '''
@@ -28,24 +28,24 @@ def main(arquivoDeOperacoes:io.TextIOWrapper, palavrasPorLinha:int, linhasPorCon
     while palavrasPorLinha < 1 or palavrasPorLinha > 128:
         palavrasPorLinha = int(input('Valor de palavras por linha da cache inválido. O valor deve'
         'ser um inteiro entre 1 e 128. Por favor, insirar um valor correto:\n'))
-    
+
     totalPalavrasCaches = 2 * palavrasPorLinha * linhasPorConjunto * numConjuntos
 
     while tamMP <= (totalPalavrasCaches):
         tamMP = int(input('Valor de palavras da memória principal inválido. O valor deve'
         'ser maior que o total de palavras da cache (%d). Por favor, insirar um valor correto:\n' % totalPalavrasCaches))
-
+    
     print('Informações de memória:')
-    print('-> %d palavras por linha;' % palavrasPorLinha)
-    print('-> %d linhas por conjunto;' % linhasPorConjunto)
-    print('-> %d conjuntos;' % numConjuntos)
-    print('-> %d palavras na memória principal;\n' % tamMP)
+    print('    -> %d palavras por linha;' % palavrasPorLinha)
+    print('    -> %d linhas por conjunto;' % linhasPorConjunto)
+    print('    -> %d conjuntos;' % numConjuntos)
+    print('    -> %d palavras na memória principal;\n' % tamMP)
 
     arquitetura = arq.Arquitetura(palavrasPorLinha, linhasPorConjunto, numConjuntos, tamMP)
 
-    arq.carregarInstrEmMP(arquitetura, arquivoDeOperacoes)
+    arquitetura.carregarInstrEmMP(arquivoDeOperacoes)
 
-    arquitetura.rodarSequenciaInstr()
+    arquitetura.rodarSequenciaInst()
 
 
 if __name__ == '__main__':
